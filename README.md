@@ -4,7 +4,7 @@ Note that all of the documentation of usage (and errors) is found in the header 
 Any implementation notes and TODOs are found inside of the source files.
 If the file is assembly, there isn't any documentation, only explanatory comments.
 
-NovaOS Version 0.1.5.4x
+NovaOS Version 0.1.5.5x
 Patch notes :-
 Bootloop Error Fixed! On the other hand, the CPU is falling through the kernel's instructions.
 Still better than a bootloop!
