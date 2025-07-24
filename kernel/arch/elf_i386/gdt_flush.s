@@ -3,7 +3,8 @@
 [BITS 32]
 
 global gdt_flush
-extern stack_top_address
+global stack_top_address
+stack_top_address equ 0x200000
 
 section .text
 

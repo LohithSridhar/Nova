@@ -4,7 +4,10 @@
 #include <kernel/tty.h>
 #include "gdt.h"
 
+void early_kernel_main(void);
+
 void kernel_main(void) {
+    early_kernel_main();
     char *string = "Hello!"; // strlen(string) = 6
     screen_initialize();
     printf("Welcome to NovaOS Version 0.0.5!\n\n");
@@ -38,6 +41,5 @@ void early_kernel_main(void) {
     gdt_init();
     screen_initialize();
     /* TODO: idt_init and then __asm__ ("sti");*/
-    kernel_main();
     return;
 }

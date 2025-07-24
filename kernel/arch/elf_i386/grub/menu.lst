@@ -1,5 +1,0 @@
-default=0
-timeout=0
-
-title NovaOS 0.0.5
-kernel /boot/kernel.elf
