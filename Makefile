@@ -1,5 +1,5 @@
 HOST=i686-elf
-OSNAME=NovaOS 0.0.5.6
+OSNAME=NovaOS 0.1.6.0
 ARCH:=$(shell if echo "$(HOST)" | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo "$(HOST)" | grep -Eo '^[[:alnum:]_]*'; fi)
 SYSTEM_HEADER_PROJECTS=libc kernel
 PROJECTS=libc kernel

@@ -4,9 +4,8 @@ Note that all of the documentation of usage (and errors) is found in the header 
 Any implementation notes and TODOs are found inside of the source files.
 If the file is assembly, there isn't any documentation, only explanatory comments.
 
-# NovaOS Version 0.1.5.6
+# NovaOS Version 0.1.6.0
 ## Patch notes
-
 
 ### NOTE: Version System is [MAJOR VERSION NUMBER].[MINOR VERSION NUMBER].[PATCH NUMBER].[CANARY TEST NUMBER] {add an x if canary is nonfunctional}
 #### Definitions:
