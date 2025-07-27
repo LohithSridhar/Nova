@@ -1,5 +1,24 @@
 #define GDT_ENTRIES 3
-#include "gdt.h"
+#include <kernel/kernel_init.h>
+#include <stdlib.h>
+
+void gdt_flush(void *gdtp);
+
+// Define a GDT entry structure as per Intel manuals
+struct gdt_entry {
+	uint16_t limit_low;  // Lower 16 bits of limit
+	uint16_t base_low; // Lower 16 bits of base
+	uint8_t base_middle;  // Next 8 bits of base
+	uint8_t access; // Access flags
+	uint8_t granularity;  // Flags and upper 4 bits of limit
+	uint8_t base_high;  // Last 8 bits of base
+} __attribute__((packed));
+
+// GDTR structure
+struct gdt_ptr {
+	uint16_t limit;
+	uint32_t base;
+} __attribute__((packed));
 
 struct gdt_entry gdt[GDT_ENTRIES];
 struct gdt_ptr gdtp;
@@ -29,5 +48,11 @@ void gdt_init(void) {
 
 	// Assembly routine to load the new GDT
 	gdt_flush(&gdtp);
+	// TODO: change stack pointer to actually have some stack space this time
+	return;
+}
+
+void kernel_init(void) {
+	gdt_init();
 	return;
 }

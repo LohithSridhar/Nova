@@ -2,12 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <kernel/tty.h>
-#include "gdt.h"
-
-void early_kernel_main(void);
+#include <kernel/kernel_init.h>
 
 void kernel_main(void) {
-    early_kernel_main();
+    kernel_init();
     char *string = "Hello!"; // strlen(string) = 6
     screen_initialize();
     printf("Welcome to NovaOS Version 0.0.5!\n\n");
@@ -33,13 +31,5 @@ void kernel_main(void) {
     printf("c after memset(4) = %d.\n", c);
     printf("strlen - the length of the string '%s' is %d\n", string, strlen(string));
     abort("Final Unit Test - abort/panic. Unit tests are complete. NovaOS 0.0.5,\nturning off.");
-    return;
-}
-
-void early_kernel_main(void) {
-    screen_initialize();
-    gdt_init();
-    screen_initialize();
-    /* TODO: idt_init and then __asm__ ("sti");*/
     return;
 }

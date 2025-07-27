@@ -1,82 +1,159 @@
-ARCHPARAMS = elf_i386
-BOOT_OBJECT = kernel/arch/$(ARCHPARAMS)/loader.o
-KERNEL_OBJECTS = kernel/kernel/kernel.o kernel/arch/$(ARCHPARAMS)/tty.o kernel/arch/$(ARCHPARAMS)/gdt.o kernel/arch/$(ARCHPARAMS)/gdt_flush.o
-LIBC_OBJECTS = libc/stdio/printf.o libc/stdio/putchar.o libc/stdio/puts.o libc/stdlib/abort.o libc/string/memcmp.o \
-libc/string/memcpy.o libc/string/memmove.o libc/string/memset.o libc/string/strlen.o
-LIBK_OBJECTS = $(LIBC_OBJECTS:.o=.libk.o)
-HEADERS = kernel/arch/$(ARCHPARAMS)/vga.h kernel/include/kernel/tty.h
-CC = i686-elf-gcc --sysroot=iso -isystem=/usr/include/
-CFLAGS = -m32 -O2 -g -ffreestanding -Wall -Wextra -Werror -c
-LDFLAGS = -g -T kernel/arch/$(ARCHPARAMS)/link.ld -m$(ARCHPARAMS)
-AS = nasm
-ASFLAGS = -g -f elf
-LD = i686-elf-ld
-AR = i686-elf-ar
-OBJCOPY = i686-elf-objcopy
-CRTI_OBJ=kernel/arch/elf_i386/crti.o
-CRTBEGIN_OBJ:=$(shell $(CC) $(CFLAGS) -print-file-name=crtbegin.o)
-CRTEND_OBJ:=$(shell $(CC) $(CFLAGS) -print-file-name=crtend.o)
-CRTN_OBJ=kernel/arch/elf_i386/crtn.o
-OBJ_LINK_LIST:=$(CRTI_OBJ) $(CRTBEGIN_OBJ) $(KERNEL_OBJECTS) $(LIBK_OBJECTS) $(CRTEND_OBJ) $(CRTN_OBJ)
-INTERNAL_OBJS:=$(BOOT_OBJECT) $(CRTI_OBJ) $(KERNEL_OBJECTS) $(LIBK_OBJECTS) $(CRTN_OBJ)
+HOST=i686-elf
+OSNAME=NovaOS 0.0.5.6
+ARCH:=$(shell if echo "$(HOST)" | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo "$(HOST)" | grep -Eo '^[[:alnum:]_]*'; fi)
+SYSTEM_HEADER_PROJECTS=libc kernel
+PROJECTS=libc kernel
 
-# Unused... for now.
-#isoinfo -i NovaOS.img -l | grep KERNEL.ELF | awk '{
-#  sectors = int( ($6 + 2047) / 2048 )
-#  print "KERNEL_LBA_START=" $1
-#  print "KERNEL_SECTORS=" sectors
-#}'
+MAKE=make
+AR=$(HOST)-ar
+AS=$(HOST)-as
+CC=$(HOST)-gcc
+GRUB=$(HOST)-grub
 
-all: kernel.elf
+PREFIX=/usr
+EXEC_PREFIX=$(PREFIX)
+BOOTDIR=/boot
+LIBDIR=$(EXEC_PREFIX)/lib
+INCLUDEDIR=$(PREFIX)/include
+
+CFLAGS=-O2 -g
+CPPFLAGS=
+LDFLAGS=
+LIBS=
+
+# Configure the cross-compiler to use the desired system root.
+SYSROOT=$(shell pwd)/sysroot
+PLAIN_CC=$(CC) --sysroot=$(SYSROOT)
+
+# Work around the fact that -elf gcc targets don't have a system include directory because they're configured with --without-headers rather than --with-sysroot.
+CC:=$(shell if echo "$(HOST)" | grep -Eq -- '-elf($$|-)'; then echo "$(PLAIN_CC) -isystem=$(INCLUDEDIR)"; else echo "$(PLAIN_CC)"; fi)
+
+# The only reason I'm keeping this seperate is because I have a feeling I'll need to change this for userspace.
+CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Werror -Wextra
+LDFLAGS:=$(LDFLAGS)
+LIBS:=$(LIBS) -nostdlib -lk -lgcc
+ARCHDIR=arch/$(ARCH)
+
+include kernel/$(ARCHDIR)/make.config
+include libc/$(ARCHDIR)/make.config
+CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
+KERNEL_CPPFLAGS:=$(CPPFLAGS)  -D__is_kernel -Iinclude $(KERNEL_ARCH_CPPFLAGS)
+LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
+LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
+CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
+LIBC_CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude $(ARCH_CPPFLAGS)
+LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
+LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) -D__is_libk $(KERNEL_ARCH_CPPFLAGS)
+KERNEL_ARCH_OBJS := $(strip $(KERNEL_ARCH_OBJS))
+ARCH_FREEOBJS := $(strip $(ARCH_FREEOBJS))
+
+KERNEL_C_OBJS=$(KERNEL_ARCH_OBJS) kernel/kernel/kernel.o
+KERNEL_C_OBJS:=$(strip $(KERNEL_C_OBJS))
+
+KERNEL_OBJS=kernel/$(ARCHDIR)/crti.o kernel/$(ARCHDIR)/crtbegin.o $(KERNEL_C_OBJS) kernel/$(ARCHDIR)/crtend.o kernel/$(ARCHDIR)/crtn.o
+
+LINK_FILE=kernel/$(ARCHDIR)/link.ld
+
+LINK_LIST=\
+$(LDFLAGS) \
+kernel/$(ARCHDIR)/crti.o \
+kernel/$(ARCHDIR)/crtbegin.o \
+$(KERNEL_C_OBJS) \
+$(LIBS) \
+kernel/$(ARCHDIR)/crtend.o \
+kernel/$(ARCHDIR)/crtn.o \
+
+FREEOBJS=\
+$(ARCH_FREEOBJS) \
+libc/stdio/printf.o \
+libc/stdio/putchar.o \
+libc/stdio/puts.o \
+libc/stdlib/abort.o \
+libc/string/memcmp.o \
+libc/string/memcpy.o \
+libc/string/memmove.o \
+libc/string/memset.o \
+libc/string/strlen.o \
+
+HOSTEDOBJS=\
+$(ARCH_HOSTEDOBJS) \
+
+LIBC_OBJS=\
+$(FREEOBJS) \
+$(HOSTEDOBJS) \
+
+LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
+
+#BINARIES=libc.a libk.a # Not ready for libc yet.
+BINARIES=libk.a
+
+.PHONY: all headers install-kernel install-libs grub-cfg build run clean
+
+all: nova.kernel $(BINARIES)
 
 headers:
-	mkdir -p iso/usr/include/
-	cp -r kernel/include/* iso/usr/include/
-	cp -r kernel/arch/$(ARCHPARAMS)/*.h iso/usr/include
-	cp -r libc/include/* iso/usr/include/
+	mkdir -p "$(SYSROOT)"
+# I'm pretty sure that this will change as I add more projects but whatever
+	mkdir -p $(SYSROOT)$(INCLUDEDIR)
+	cp -R */include/. $(SYSROOT)$(INCLUDEDIR)/.
 
-libk.a: headers $(LIBK_OBJECTS)
-	$(AR) rcs $@ $(LIBK_OBJECTS)
+nova.kernel: $(KERNEL_OBJS) kernel/$(ARCHDIR)/link.ld $(BINARIES)
+	$(CC) -T $(LINK_FILE) -o $@ $(CFLAGS) $(LINK_LIST)
+	$(GRUB)-file --is-x86-multiboot nova.kernel
 
-envsetup: libk.a
-	mkdir -p iso/boot/grub/
-	mkdir iso/usr/lib/
-	cp libk.a iso/usr/lib/
+libc.a: $(OBJS)
+	$(AR) rcs $@ $(OBJS)
 
-KERNEL.BIN: envsetup $(KERNEL_OBJECTS) $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(CRTEND_OBJ) $(CRTN_OBJ)
-	$(LD) $(LDFLAGS) $(OBJ_LINK_LIST) -o kernel.elf
-	$(OBJCOPY) -O binary kernel.elf KERNEL.BIN
+libk.a: $(LIBK_OBJS)
+	$(AR) rcs $@ $(LIBK_OBJS)
 
-NovaOS.img: KERNEL.BIN $(BOOT_OBJECT)
-	dd if=/dev/zero bs=1M count=64 of=NovaOS.img
-	mkfs.vfat -F 32 NovaOS.img
-	dd if=$(BOOT_OBJECT) of=NovaOS.img bs=512 count=1 conv=notrunc
-	mcopy -i NovaOS.img KERNEL.BIN ::/
-	dd if=/dev/zero bs=512 count=1 >> kernel.bin
-# NovaOS.img's FAT32 state is temporary until we install userspace. The following is just for show.
-	mv kernel/arch/$(ARCHPARAMS)/loader.o iso/boot/loader.bin
-	mv KERNEL.BIN iso/boot/KERNEL.BIN
-
-run: NovaOS.img
-	qemu-system-i386 -hda NovaOS.img -m 4
-
-%.libk.o: %.c
-	$(CC) $(CFLAGS) -D__is_libk $< -o $@
+kernel/$(ARCHDIR)/crtbegin.o kernel/$(ARCHDIR)/crtend.o:
+	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) $< -o $@
-
-kernel/arch/$(ARCHPARAMS)/loader.o: kernel/arch/$(ARCHPARAMS)/loader.s
-	$(AS) -f bin $< -o $@
+	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
 
 %.o: %.s
-	$(AS) $(ASFLAGS) $< -o $@
+	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+
+%.libk.o: %.c
+	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+
+%.libk.o: %.s
+	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+
+install-kernel: nova.kernel
+	mkdir -p $(SYSROOT)$(BOOTDIR)
+	cp nova.kernel $(SYSROOT)$(BOOTDIR)
+
+install-libs: $(BINARIES)
+	mkdir $(SYSROOT)$(LIBDIR)
+	cp $(BINARIES) $(SYSROOT)$(LIBDIR)
+
+build: headers
+	make install-libs
+	make install-kernel
+
+NovaOS.iso: build
+	mkdir -p isodir/boot/grub
+	cp $(SYSROOT)$(BOOTDIR)/nova.kernel isodir/boot/nova.kernel
+	printf 'menuentry "$(OSNAME)" {\nmultiboot /boot/nova.kernel\n}\n' > isodir/boot/grub/grub.cfg
+	$(GRUB)-mkrescue -o $@ isodir
+
+run: NovaOS.iso
+	echo "Make sure to quit qemu using the close button and not CTRL+C to continue any processes."
+	qemu-system-$(ARCH) -cdrom NovaOS.iso
 
 clean:
-	rm -rf *.o NovaOS.img kernel.elf libk.a
-	rm -rf $(INTERNAL_OBJS)
-	rm -rf iso
+	rm -rf nova.kernel $(BINARIES)
+	rm -rf $(OBJS) $(LIBC_OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o */*/*/*.o
+	rm -rf $(KERNEL_OBJS:.o=.d) $(LIBC_OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d */*/*/*.d
+	rm -rf sysroot isodir NovaOS.iso
 
-cleanrun:
+cycle:
 	make run
 	make clean
+
+-include $(KERNEL_OBJS:.o=.d)
+-include $(LIBC_OBJS:.o=.d)
+-include $(LIBK_OBJS:.o=.d)
