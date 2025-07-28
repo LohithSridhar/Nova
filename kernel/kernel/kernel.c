@@ -8,7 +8,7 @@ void kernel_main(void) {
     kernel_init();
     char *string = "Hello!"; // strlen(string) = 6
     screen_initialize();
-    printf("Welcome to NovaOS Version 0.0.5!\n\n");
+    printf("Welcome to NovaOS Version 0.1.6!\n\n");
     screen_writestring("Currently, we are completing unit tests.\nputchar - ");
     int zero = putchar(48); // should print '0'
     putchar(zero + 1); // should print '1'
