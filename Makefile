@@ -1,5 +1,7 @@
-HOST=i686-elf
-OSNAME=NovaOS 0.1.6.0
+HOST?=i686-elf
+SCREEN?=vga
+KEYBOARD?=ps2
+OSNAME=NovaOS 0.1.7.0
 ARCH:=$(shell if echo "$(HOST)" | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo "$(HOST)" | grep -Eo '^[[:alnum:]_]*'; fi)
 SYSTEM_HEADER_PROJECTS=libc kernel
 PROJECTS=libc kernel
@@ -41,13 +43,17 @@ KERNEL_CPPFLAGS:=$(CPPFLAGS)  -D__is_kernel -Iinclude $(KERNEL_ARCH_CPPFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
+
 LIBC_CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude $(ARCH_CPPFLAGS)
 LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
 LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) -D__is_libk $(KERNEL_ARCH_CPPFLAGS)
-KERNEL_ARCH_OBJS := $(strip $(KERNEL_ARCH_OBJS))
-ARCH_FREEOBJS := $(strip $(ARCH_FREEOBJS))
+KERNEL_ARCH_OBJS:=$(strip $(KERNEL_ARCH_OBJS))
+ARCH_FREEOBJS:=$(strip $(ARCH_FREEOBJS))
 
-KERNEL_C_OBJS=$(KERNEL_ARCH_OBJS) kernel/kernel/kernel.o
+# NOTE: the video driver has the same $(SCREEN) name as the tty driver.
+DRIVER_OBJS=kernel/$(ARCHDIR)/drivers/tty/$(SCREEN)_tty.o kernel/$(ARCHDIR)/drivers/keyboard/$(KEYBOARD)_keyboard.o
+
+KERNEL_C_OBJS=$(KERNEL_ARCH_OBJS) $(DRIVER_OBJS) kernel/kernel/kernel.o
 KERNEL_C_OBJS:=$(strip $(KERNEL_C_OBJS))
 
 KERNEL_OBJS=kernel/$(ARCHDIR)/crti.o kernel/$(ARCHDIR)/crtbegin.o $(KERNEL_C_OBJS) kernel/$(ARCHDIR)/crtend.o kernel/$(ARCHDIR)/crtn.o
@@ -68,6 +74,9 @@ $(ARCH_FREEOBJS) \
 libc/stdio/printf.o \
 libc/stdio/putchar.o \
 libc/stdio/puts.o \
+libc/stdio/getchar.o \
+libc/stdio/fgets.o \
+libc/stdio/scanf.o \
 libc/stdlib/abort.o \
 libc/string/memcmp.o \
 libc/string/memcpy.o \
@@ -101,8 +110,8 @@ nova.kernel: $(KERNEL_OBJS) kernel/$(ARCHDIR)/link.ld $(BINARIES)
 	$(CC) -T $(LINK_FILE) -o $@ $(CFLAGS) $(LINK_LIST)
 	$(GRUB)-file --is-x86-multiboot nova.kernel
 
-libc.a: $(OBJS)
-	$(AR) rcs $@ $(OBJS)
+libc.a: $(LIBC_OBJS)
+	$(AR) rcs $@ $(LIBC_OBJS)
 
 libk.a: $(LIBK_OBJS)
 	$(AR) rcs $@ $(LIBK_OBJS)
@@ -142,12 +151,20 @@ NovaOS.iso: build
 
 run: NovaOS.iso
 	echo "Make sure to quit qemu using the close button and not CTRL+C to continue any processes."
-	qemu-system-$(ARCH) -cdrom NovaOS.iso
+	qemu-system-$(ARCH) -k en-us -cdrom NovaOS.iso
+
+quickrun:
+	qemu-system-$(ARCH) -k en-us -cdrom NovaOS.iso
+
+debug: NovaOS.iso
+	(qemu-system-$(ARCH) -k en-us -s -S -cdrom NovaOS.iso &)
+	(sleep 1 && gdb sysroot/boot/nova.kernel)
+	make clean
 
 clean:
 	rm -rf nova.kernel $(BINARIES)
-	rm -rf $(OBJS) $(LIBC_OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o */*/*/*.o
-	rm -rf $(KERNEL_OBJS:.o=.d) $(LIBC_OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d */*/*/*.d
+	rm -rf $(KERNEL_OBJS) $(LIBC_OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o */*/*/*.o */*/*/*/*.o
+	rm -rf $(KERNEL_OBJS:.o=.d) $(LIBC_OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d */*/*/*.d */*/*/*/*.d
 	rm -rf sysroot isodir NovaOS.iso
 
 cycle:

@@ -1,27 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #if defined(__is_libk)
-#include <kernel/tty.h>
+#include <drivers/tty.h>
+#include <kernel/kernel_init.h>
 //#include "vga.h" // Still too VGA centric, although the colours are being changed
 #endif
 
 __attribute__((__noreturn__))
-void abort(char* reason) {
+void abort(char* cause) {
 #if defined(__is_libk)
 	// TODO: Add proper kernel panic.
-	screen_setcolor((uint8_t) 4); // 4, 0
-	printf("NovaOS 0.0.5: kernel: PANIC: abort()\n");
-	screen_setcolor((uint8_t) 12); // 12, 0
-	printf("Reason: %s\n", reason);
-	screen_setcolor((uint8_t) 192); // 0, 12
+	tty_setcolor(entry_color(TTY_COLOR_RED, TTY_COLOR_BLACK)); // 4, 0
+	printf("NovaOS 0.1.6: kernel: PANIC: abort()\n");
+	tty_setcolor(entry_color(TTY_COLOR_BRIGHT_RED, TTY_COLOR_BLACK)); // 12, 0
+	printf("Cause: %s\n", cause);
+	tty_setcolor(entry_color(TTY_COLOR_BLACK, TTY_COLOR_BRIGHT_RED)); // 0, 12
 	printf("FATAL ERROR\n");
-	screen_setcolor((uint8_t) 4); // 4, 0 return fg_color | bg_color << 4;
-	printf("Restart the machine to reset system.\n", reason);
+	tty_setcolor(entry_color(TTY_COLOR_RED, TTY_COLOR_BLACK)); // 4, 0 return fg_color | bg_color << 4;
+	printf("Restart the machine to reset system.\n", cause);
 #else
 	// TODO: Abnormally terminate the process as if by SIGABRT.
-	printf("abort() due to Reason:%s\n", reason);
+	printf("abort() due to cause:%s\n", cause);
 #endif
-	while (1) { }
+	halt();
 	__builtin_unreachable();
 }
 

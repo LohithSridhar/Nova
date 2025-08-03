@@ -1,35 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <kernel/tty.h>
+#include <stdbool.h>
 #include <kernel/kernel_init.h>
 
 void kernel_main(void) {
-    kernel_init();
-    char *string = "Hello!"; // strlen(string) = 6
-    screen_initialize();
-    printf("Welcome to NovaOS Version 0.1.6!\n\n");
-    screen_writestring("Currently, we are completing unit tests.\nputchar - ");
-    int zero = putchar(48); // should print '0'
-    putchar(zero + 1); // should print '1'
-    puts("\nputs - Does this work?");
-    puts("puts - Is this on a seperate line?");
-    printf("printf - The char putchar printed is %c (in ASCII %d), and an example string is:\n%s   %%\n", zero, 48, string);
-    char a = 0b00011111;
-    char b = 0b00100000;
-    printf("memcmp - memcmp(31, 32) = %d, memcmp(32, 31) = %d, memcmp(32, 32) = %d\n", memcmp(&a, &b, sizeof(char)),
-                                                                                       memcmp(&b, &a, sizeof(char)),
-                                                                                       memcmp(&b, &b, sizeof(char)));
-    char c = 0b10101010;
-    printf("memcpy and memmove - c = %d. ", c);
-    memmove(&c, &a, sizeof(char));
-    printf("memmove(c, 31) -> c = %d. ", c);
-    memcpy(&c, &b, sizeof(char));
-    printf("memcpy(c, 32) -> c = %d.", c);
-    printf("memset - c before memset = %d, ", c);
-    memset(&c, 4, sizeof(char));
-    printf("c after memset(4) = %d.\n", c);
-    printf("strlen - the length of the string '%s' is %d\n", string, strlen(string));
-    abort("Final Unit Test - abort/panic. Unit tests are complete. NovaOS 0.0.5,\nturning off.");
-    return;
+	kernel_init();
+	printf("Welcome to NovaOS Version 0.1.7!\n\n");
+	
+	printf("Would you like to play a game? ");
+	
+	char temp[100];
+	scanf("%s", temp);
+	printf("I don't care.\n");
+	int secret, guess, attempts = 0;
+	const int max_attempts = 7;
+
+	// Make a random number
+	secret = get_rand() + 1; // get_rand is irq_0 based, and is also conveniently mod 100!
+	
+	printf("Welcome to the Number Guesser Game! I have a number between 1 and 100. Guess it in %d attempts!\n", max_attempts);
+
+	while (attempts < max_attempts) {
+		printf("Attempt #%d: ", attempts + 1);
+
+		if (scanf("%d", &guess) != 1) {
+			printf("It's alright; it isn't the first time you forgot how to count!\n");
+			continue;
+		}
+
+		attempts++;
+
+		if (guess < secret && attempts < max_attempts) {
+			printf("Too low! Try again in ");
+		} else if (guess > secret && attempts < max_attempts) {
+			printf("Too high! Try again in ");
+		} else {
+			printf("Congratulations! You guessed the correct number, %d, in %d attempts.\n", secret, attempts);
+			abort("Congratulations, You Won!");
+		}
+	}
+
+	printf("Aww, you've failed. The correct answer was %d.\n", secret);
+	abort("You failed.");
 }

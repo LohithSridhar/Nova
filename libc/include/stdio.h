@@ -2,6 +2,7 @@
 #define _STDIO_H 1
 
 #include <sys/cdefs.h>
+#include <stddef.h>
 
 #define EOF (-1) // EOF as in End Of File
 
@@ -25,4 +26,11 @@ int putchar(int);
  * INPUT - const char* string (string to be printed)
  * OUPTUT - int success_code (literally just the success_code of printf) */
 int puts(const char*);
+
+int getchar(void);
+
+char* fgets(char*, size_t);
+
+int scanf(const char*, ...);
+
 #endif
