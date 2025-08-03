@@ -31,16 +31,28 @@ void kernel_main(void) {
 
 		attempts++;
 
-		if (guess < secret && attempts < max_attempts) {
-			printf("Too low! Try again in ");
-		} else if (guess > secret && attempts < max_attempts) {
-			printf("Too high! Try again in ");
-		} else {
-			printf("Congratulations! You guessed the correct number, %d, in %d attempts.\n", secret, attempts);
-			abort("Congratulations, You Won!");
+		if (attempts >= max_attempts) {
+			if (guess == secret) {
+				printf("Congratulations! You guessed the correct number, %d, in %d attempts.\n", secret, attempts);
+				abort("Congratulations, You Won!");
+				return;
+			} else {
+				break;
+			}
+		}
+		else {
+			if (guess < secret) {
+				printf("Too low! Try again in ");
+			} else if (guess > secret) {
+				printf("Too high! Try again in ");
+			} else {
+				printf("Congratulations! You guessed the correct number, %d, in %d attempts.\n", secret, attempts);
+				abort("Congratulations, You Won!");
+			}
 		}
 	}
 
 	printf("Aww, you've failed. The correct answer was %d.\n", secret);
 	abort("You failed.");
+	return;
 }
