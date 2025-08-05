@@ -36,6 +36,7 @@ LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 ARCHDIR=arch/$(ARCH)
 
+include libc/make.config
 include kernel/$(ARCHDIR)/make.config
 include libc/$(ARCHDIR)/make.config
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
@@ -68,21 +69,6 @@ $(KERNEL_C_OBJS) \
 $(LIBS) \
 kernel/$(ARCHDIR)/crtend.o \
 kernel/$(ARCHDIR)/crtn.o \
-
-FREEOBJS=\
-$(ARCH_FREEOBJS) \
-libc/stdio/printf.o \
-libc/stdio/putchar.o \
-libc/stdio/puts.o \
-libc/stdio/getchar.o \
-libc/stdio/fgets.o \
-libc/stdio/scanf.o \
-libc/stdlib/abort.o \
-libc/string/memcmp.o \
-libc/string/memcpy.o \
-libc/string/memmove.o \
-libc/string/memset.o \
-libc/string/strlen.o \
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \

@@ -97,7 +97,31 @@ int printf(const char* restrict format, ...) { // This logic is really confusing
 		    format++;
 		}
 
-		if (*format == 'c') {                       // %c for character (aka char or uchar)
+		if (*format == 'z' && *(format + 1) == 'u') {
+		    format += 2;
+		    size_t u = va_arg(parameters, size_t);
+		    char str[21]; // Enough for 64-bit size_t
+		    int i = 0;
+		    if (u == 0) {
+		        str[i++] = '0';
+		        str[i] = '\0';
+		    } else {
+		        size_t n = u;
+		        int num_len = 0;
+		        size_t tmp = n;
+		        while (tmp) { tmp /= 10; num_len++; }
+		        str[i + num_len] = '\0';
+		        while (n) {
+		            str[i + num_len - 1] = '0' + (n % 10);
+		            n /= 10;
+		            num_len--;
+		        }
+		    }
+		    size_t len = strlen(str);
+		    if (maxrem < len) return -1;
+		    if (!print(str, len)) return -1;
+		    written += len;
+		} else if (*format == 'c') {                       // %c for character (aka char or uchar)
 			format++;
 			char c = (char) va_arg(parameters, int);
 			if (!maxrem) {
@@ -166,18 +190,27 @@ int printf(const char* restrict format, ...) { // This logic is really confusing
 			written += len;
 		} else if (*format == 'p') {
 			format++;
-			void* pointer = va_arg(parameters, void*);
-			uintptr_t uint_for_hex = (uintptr_t) pointer;
-			char str[13];
+			void *pointer = va_arg(parameters, void *);
+			uintptr_t addr = (uintptr_t)pointer;
+
+			// Account for 32 or 64 bit
+			char str[2 + sizeof(uintptr_t) * 2 + 1]; // "0x" + 16 hex + NUL
 			str[0] = '0';
 			str[1] = 'x';
-			size_t len = (size_t) uint_to_hex(&str[2], sizeof(str) - 2, (unsigned int) uint_for_hex, 10, true, true);
-			if (maxrem < len) {
-				// TODO: Set errno to EOVERFLOW
-				return -1;
+			int pos = 2;
+			bool started = false;
+			for (int i = (sizeof(uintptr_t) * 2) - 1; i >= 0; i--) {
+				int shift = i * 4;
+				char digit = "0123456789abcdef"[(addr >> shift) & 0xf];
+				if (digit != '0' || started || i == 0) {
+					started = true;
+					str[pos++] = digit;
+				}
 			}
-			if (!print(str, len))
-				return -1;
+			str[pos] = '\0';
+			size_t len = pos;
+			if (maxrem < len) return -1;
+			if (!print(str, len)) return -1;
 			written += len;
 		} else {                                    // TODO: add %f/F, %A/%a, and %e (%E is a crime)
 			format = format_begun_at;

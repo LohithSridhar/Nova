@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #if defined(__is_libk)
 #include <drivers/tty.h>
-#include <kernel/kernel_init.h>
-//#include "vga.h" // Still too VGA centric, although the colours are being changed
+extern void halt(void);
 #endif
 
 __attribute__((__noreturn__))
@@ -18,11 +17,12 @@ void abort(char* cause) {
 	printf("FATAL ERROR\n");
 	tty_setcolor(entry_color(TTY_COLOR_RED, TTY_COLOR_BLACK)); // 4, 0 return fg_color | bg_color << 4;
 	printf("Restart the machine to reset system.\n", cause);
+	halt();
 #else
 	// TODO: Abnormally terminate the process as if by SIGABRT.
 	printf("abort() due to cause:%s\n", cause);
 #endif
-	halt();
+	while (1) {};
 	__builtin_unreachable();
 }
 

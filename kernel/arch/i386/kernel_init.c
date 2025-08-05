@@ -7,6 +7,8 @@
 #include "interrupts.h"
 #include <kernel/kernel_init.h>
 
+extern void heap_initialize(void);
+
 #define GDT_ENTRIES 4
 #define KERNEL_STACK_TOP 0x200000
 
@@ -108,6 +110,7 @@ void kernel_init(void) {
 	enable_interrupts();                         // External: asm sti
 
 	// Kernel main loop or hand off to further init...
+	heap_initialize();
 	tty_initialize();
 	keyboard_initialize();
 	return;

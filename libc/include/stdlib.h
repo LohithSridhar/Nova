@@ -6,6 +6,17 @@
 #endif
 
 #include <sys/cdefs.h>
+#include <stddef.h>
+
+void *malloc(size_t);
+
+int free(void *);
+
+void *calloc(size_t, size_t);
+
+void *realloc(void *, size_t);
+
+void print_heap(void);
 
 /* abort (panic in case of libk usage)
  * PURPOSE - Kernel Panic

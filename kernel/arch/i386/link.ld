@@ -2,27 +2,66 @@ ENTRY(_start)
 
 SECTIONS
 {
-	. = 0x100000;          /* Kernel load address: 1MB */
+    /* Start at 1MiB */
+    . = 0x100000;
 
-	.text ALIGN(4K) : {
-		*(.multiboot)
-		*(.text)
-	}
+    .text ALIGN(4K) :
+    {
+        *(.multiboot)
+        *(.text)
+    }
 
-	.rodata ALIGN(4K) : { *(.rodata*) }
-	.data   ALIGN(4K) : { *(.data*) }
-	.bss    ALIGN(4K) : { *(COMMON) *(.bss) }
+    .rodata ALIGN(4K) :
+    {
+        *(.rodata*)
+    }
 
-	/* Explicitly align start of GDT, TSS, and IDT */
-	. = ALIGN(0x1000);
-	.gdt : { *(.gdt) }
+    .data ALIGN(4K) :
+    {
+        *(.data*)
+    }
 
-	. = ALIGN(0x1000);
-	.tss : { *(.tss) }
+    .bss ALIGN(4K) :
+    {
+        *(COMMON)
+        *(.bss)
+    }
 
-	. = ALIGN(0x1000);
-	.idt : { *(.idt) }
+    /* Define heap immediately after .bss and aligned */
+    .heap ALIGN(4K) :
+    {
+        __heap_start = .;
+        /* Reserve 960KB for heap (0xF0000) to avoid overlapping stack */
+        . = . + 0xF0000;
+        __heap_end = .;
+    }
 
-	PROVIDE(stack_bottom = 0x200000 - 16*1024);
-	PROVIDE(stack_top = 0x200000);
+    /* Align and place GDT, TSS, IDT after heap */
+    . = ALIGN(4K);
+
+    .gdt :
+    {
+        *(.gdt)
+    }
+
+    . = ALIGN(4K);
+
+    .tss :
+    {
+        *(.tss)
+    }
+
+    . = ALIGN(4K);
+
+    .idt :
+    {
+        *(.idt)
+    }
+
+    /* Define stack region explicitly with symbols, just after IDT */
+    . = ALIGN(4K);
+    PROVIDE(stack_top = . + 0x4000); /* 16 KB stack size */
+    PROVIDE(stack_bottom = .);
+
+    /* No actual section content for stack as stack grows down from stack_top */
 }
