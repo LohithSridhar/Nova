@@ -28,8 +28,8 @@ _A hobby operating system for x86, featuring plug-and-play libc, kernel, and dri
 
 ## Screenshots
 
-![Bootsplash](.github/images/bootsplash.png)
-![Cheating a Guessing Game](.github/images/usage.gif)
+![Bootsplash](images/bootsplash.png)
+![Cheating a Guessing Game](images/usage.gif)
 
 ---
 
