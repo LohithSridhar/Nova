@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include <kernel/kernel_init.h>
-#include <drivers/keyboard.h>
 #include <sys/osname.h>
 
 extern void wait(void);
