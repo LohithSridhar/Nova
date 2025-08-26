@@ -6,7 +6,7 @@
 int getchar() {
 #if defined(__is_libk)
 	char c[2];
-	read_keyboard(c, 2, false, true);
+	read_keyboard(c, 2, false);
 	if (c[0] != '\0') return (int)c[0];
 #else
 	// TODO: implement system calls.

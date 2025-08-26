@@ -2,21 +2,8 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
-
-// Helper: parse decimal integer
-static int parse_decimal(const char *s, int *out) {
-	int val = 0, sign = 1, read = 0;
-	while (*s == ' ' || *s == '\t') s++;
-	if (*s == '-') { sign = -1; s++; }
-	else if (*s == '+') s++;
-	while (*s >= '0' && *s <= '9') {
-		val = val * 10 + (*s - '0');
-		s++;
-		read = 1;
-	}
-	if (read) *out = val * sign;
-	return read;
-}
+#include <stdlib.h>
+#include <ctype.h>
 
 // Helper: parse hex integer (lower or upper case)
 static int parse_hex(const char *s, int *out) {
@@ -54,9 +41,8 @@ int scanf(const char *format, ...) {
 			f++;
 			if (*f == 'd') {
 				int *ptr = va_arg(ap, int *);
-				int val;
-				if (!parse_decimal(s, &val)) break;
-				*ptr = val;
+				if (!(((*s == '-' || *s == '+') && isdigit(*(s+1))) || isdigit(*s))) break;
+				*ptr = atoi(s);
 				assigned++;
 				while ((*s >= '0' && *s <= '9') || *s == '-' || *s == '+') s++;
 			} else if (*f == 'x' || *f == 'X') {

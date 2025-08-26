@@ -43,6 +43,26 @@ void print_memory(void *addr, size_t len) {
 	putchar('\n');
 }
 
+int convert_to_hex(int value) {
+	// This assumes that the value is a hex number with all digits in decimal (eg. 0x16 -> 0x10)
+	int result = 0;
+	int multiplier = 1;
+
+	while (value > 0) {
+		int digit = value % 16;
+		if (digit > 9) {
+			// Invalid
+			return 0xFFFFFFFF;
+		}
+
+		result += digit * multiplier;
+		multiplier *= 10;
+		value /= 16;
+	}
+
+	return result;
+}
+
 void debugger() {
 	bool exit = false;
 	char command[15];
@@ -67,24 +87,8 @@ void debugger() {
 			printf("0d%p 0x%X\n", (void *) arg2, (size_t) arg3); print_memory((void *) arg2, (size_t) arg3);}
 			else if (!strcmp(arg1, "stack") || !strcmp(arg1, "s")) {printf("printing stack...\n"); print_stack();}
 		} else if (!strcmp(command, "convert") || !strcmp(command, "conv") || !strcmp(command, "cnv")) {
-			if (!strcmp(arg1, "hexadecimal") || !strcmp(arg1, "hex") || !strcmp(arg1, "h")) {
-				// Assuming arg2 has a decimal number
-				int reversed_decimal = 0;
-				while (arg2) {
-					reversed_decimal *= 10;
-					reversed_decimal += arg2 % 16;
-					arg2 /= 16;
-				} // FIXME: what the hell, this is literally so inefficient
-
-				int decimal = 0;
-				while (reversed_decimal) {
-					decimal *= 10;
-					decimal += reversed_decimal % 10;
-					reversed_decimal /= 16;
-				}
-
-				printf("hexadecimal(%d) = 0x%X\n", decimal, decimal);
-			}
+			if (!strcmp(arg1, "hexadecimal") || !strcmp(arg1, "hex") || !strcmp(arg1, "h"))
+				printf("hexadecimal(%X) = 0x%X\n", arg2, convert_to_hex(arg2));
 			if (!strcmp(arg1, "decimal") || !strcmp(arg1, "dec") || !strcmp(arg1, "d"))
 				printf("decimal(0x%X) = %d\n", arg2, arg2);
 		} else if (!strcmp(command, "abort") || !strcmp(command, "panic")) {

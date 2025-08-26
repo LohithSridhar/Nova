@@ -10,4 +10,6 @@ typedef unsigned long long uint64_t;
 typedef unsigned int uintptr_t;
 typedef int intptr_t;
 
+#define SIZE_MAX 4294967295u
+
 // stdint.h - This header file is literally just dedicated to giving us nice computer-sensible names for the C types.

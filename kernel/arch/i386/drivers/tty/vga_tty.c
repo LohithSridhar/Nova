@@ -113,7 +113,7 @@ static inline void tty_set_cursor_location(int x, int y) {
 	if (screen_index(x, y) <= MAX_VGA_INDEX) cursor_position = screen_index(x, y);
 }
 
-static void tty_update_cursor_location(void) {
+void tty_update_cursor_location(void) {
 	outb(VGA_CTRL_REGISTER, 0x0F);
 	outb(VGA_DATA_REGISTER, (uint8_t)(cursor_position & 0xFF));
 

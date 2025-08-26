@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <drivers/keyboard.h>
 #include <kernel/kernel_init.h>
 #include <kernel/cursor.h>
@@ -11,8 +12,6 @@
 
 #define KEYBOARD_INPUT_PORT 0x60
 #define EO(x) (0xE000 | (x))
-// TODO: add an isalpha function in ctype.h
-#define isalpha(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))
 
 typedef enum {
 	SC_NONE = 0x00,
@@ -433,7 +432,7 @@ char read_buffer(void) {
 	}
 }
 
-void read_keyboard(char *buffer, size_t buflen, bool silent, bool multiline) {
+void read_keyboard(char *buffer, size_t buflen, bool silent) {
 	clear_buffer();
 	memset(buffer, '\0', buflen);
 	uint16_t length = 0;
@@ -450,13 +449,13 @@ void read_keyboard(char *buffer, size_t buflen, bool silent, bool multiline) {
 			if (key == 'l') {
 				if (cursor_position_in_field > 0) {
 					cursor_position_in_field--;
-					tty_change_leftright_position(-1);
+					if (!silent) tty_change_leftright_position(-1);
 				}
 				continue;
 			} else if (key == 'r') {
 				if (cursor_position_in_field < length) {
 					cursor_position_in_field++;
-					tty_change_leftright_position(1);
+					if (!silent) tty_change_leftright_position(1);
 				}
 				continue;
 			}
@@ -469,7 +468,7 @@ void read_keyboard(char *buffer, size_t buflen, bool silent, bool multiline) {
 				else putchar(key);
 			}
 		}
-		if (key == '\0' || (key == '\n' && !multiline)) {
+		if (key == '\0' || key == '\n') {
 			length++;
 			break; // enter - terminate processing
 		} else if (key == '\b') {
@@ -479,13 +478,14 @@ void read_keyboard(char *buffer, size_t buflen, bool silent, bool multiline) {
 
 			if (!(cursor_position_in_field > 0 && length > 0)) continue;
 			cursor_position_in_field--;
-			tty_change_leftright_position(-1);
+			if (!silent) tty_change_leftright_position(-1);
 			
 			// Decrease length and null-terminate
 			length--;
 			buffer[length] = '\0';
 
 			// Reprint the portion of buffer from cursor to end
+			if (silent) continue;
 			for (size_t i = cursor_position_in_field; i < length; i++) {
 				putchar(buffer[i]);
 			}
@@ -510,7 +510,7 @@ void read_keyboard(char *buffer, size_t buflen, bool silent, bool multiline) {
 		buffer[cursor_position_in_field] = (char) key;
 		if (length != cursor_position_in_field+1) {
 			for (size_t i = cursor_position_in_field+1; i < length; i++) putchar(buffer[i]);
-			tty_change_leftright_position(((int) cursor_position_in_field+1) - ((int) length));
+			if (!silent) tty_change_leftright_position(((int) cursor_position_in_field+1) - ((int) length));
 		}
 		cursor_position_in_field++;
 	}
@@ -535,12 +535,6 @@ void keyboard_interrupt(void) {
 		// Extended Key
 		scan_code <<= 8;
 		scan_code |= inb(KEYBOARD_INPUT_PORT);
-
-		if (key_pressed != SC_NONE) {
-			if (key_pressed == scan_code) {
-				return; // While this disables repeating keys, it make life easier right now. TODO: disable.
-			}
-		}
 	}
 
 	if (scan_code & 0b10000000) {
@@ -572,11 +566,6 @@ void keyboard_interrupt(void) {
 		}
 	}
 
-	if (key_pressed != SC_NONE) {
-		if (key_pressed == scan_code) {
-			return; // While this disables repeating keys, it make life easier right now. TODO: disable.
-		}
-	}
 	if (scanindex < 200) {
 		scanbuffer[scanindex] = (scan_code_t) scan_code;
 		scanindex++;

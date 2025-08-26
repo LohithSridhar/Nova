@@ -44,8 +44,14 @@ void tty_initialize(void);
  * PURPOSE - Print character at cursor and move cursor
  * INPUT - char c (any ASCII/UTF-8 character)
  * OUTPUT - NULL (character is printed and cursor is moved) 
- * NOTES - Doesn't update the cursor; for that, use writestring. */
+ * NOTES - Doesn't update the cursor; for that, use writestring or manually do so. */
 void tty_putchar(char);
+
+/* tty_update_cursor_location
+ * PURPOSE - Self-explanatory. Note that you can't set, only update.
+ * INPUT - NULL
+ * OUTPUT - NULL */
+void tty_update_cursor_location(void);
 
 /* tty_setcolor
  * PURPOSE - Change text colour to inputted colour

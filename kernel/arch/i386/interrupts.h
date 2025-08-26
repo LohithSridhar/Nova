@@ -12,7 +12,7 @@ static inline void disable_interrupts() {
 	__asm__ volatile ("cli");
 }
 
-extern int timenum; // TEMP: This will be replaced when we begin working on cron/irq 0 timers.
+extern volatile int timenum; // TEMP: This will be replaced when we begin working on cron/irq 0 timers.
 
 void irq0_handler(void); // Handler for the timer interrupt.
 void irq1_handler(void); // Handler for the keyboard interrupt.

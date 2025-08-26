@@ -5,7 +5,7 @@ extern void halt(void);
 #endif
 
 __attribute__((__noreturn__))
-void abort(char* cause, char *process_name) {
+void abort(const char* cause, const char *process_name) {
 #if defined(__is_libk)
 	// TODO: Add proper kernel panic.
 	printf("\x1B[31;40m%s: kernel: PANIC: abort()\n", process_name);

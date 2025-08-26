@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -120,6 +121,10 @@ inline void breakpoint(void) {
 
 extern void _init(void);
 
+void random_init(void) { // lmao this is so simple
+	srand(timenum);
+}
+
 void kernel_init(void) {
 	_init(); // Call global constructors
 
@@ -149,10 +154,6 @@ void wait(void) {
 	return;
 }
 
-int get_rand(void) { // lmao this is so simple
-	return timenum; // TODO: TEMP TEMP TEMP TEMP TEMP TEMP TEMP TEMP
-}
-
 extern void _fini(void);
 
 void kernel_exit(void) {
@@ -161,6 +162,7 @@ void kernel_exit(void) {
 	return;
 }
 
+__attribute__((__noreturn__))
 void halt(void) {
 	disable_interrupts();
 	while (1) {};

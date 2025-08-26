@@ -55,7 +55,7 @@ make quick-run
 ```
 _Or, if you haven't built yet,_ `make run`.
 
-**NOTE**: The Bootsplash is off by default. run make with `BOOTSPLASH=true` for it to be on.
+**NOTE**: The Bootsplash is off by default. Do `make iso/run/cycle BOOTSPLASH=true` for it to be on (NOTE: DOES NOT WORK WITH `quick-run`).
 
 **Cleaning**
 ```
@@ -63,6 +63,7 @@ make clean
 ```
 _Or, if you want to run and clean quickly,_ `make cycle`.
 
+Remember to clean after running the program if making changes, as `make iso` assumes that no `.o` or `.d` files exist yet.
 ---
 
 ## Roadmap
@@ -73,9 +74,14 @@ _Or, if you want to run and clean quickly,_ `make cycle`.
 - [x] Breakpoint interrupt
 - [x] Bootsplash
 - [x] Internal Kernel Debugger
-- [ ] Basic Timer Functions (`time`, `rand`, `srand`)
-- [ ] Expanded libc/k (`str(n)dup`, `memccpy`, `atoi`, `sprintf`)
+- [x] Basic Timer Functions (`rand`, `srand`)
+- [x] Expanded libc/k (`str(n)dup`, `memccpy`, `atoi`, `sprintf`)
+- [x] Optimisation of I/O (also added holding keys for the PS/2)
 - [ ] New Name! (Muon)
+- [ ] Best-Fit Memory Management
+- [ ] Basic Non-Switching Paging
+- [ ] Improved IKD with Stack Traceback
+- [ ] SSP and Improved Safety and Privacy features
 
 ---
 

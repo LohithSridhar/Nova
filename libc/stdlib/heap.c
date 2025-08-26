@@ -76,22 +76,22 @@ void *malloc(size_t size) {
 		if (current_block->is_free && current_block->size >= size) {
 			// We have a winner!
 			// WELCOME TO POINTER HELL
-			if ((current_block->size - size) >= sizeof(header_t) + 1) {
-				header_t *new_block = (header_t *) ((uint8_t *)
-				current_block + sizeof(header_t) + size);
-				new_block->size = current_block->size - size - sizeof(header_t);
+			size_t leftover_size = current_block->size - size;
+			if ((leftover_size) >= sizeof(header_t) + 1) {
+				header_t *new_block = (header_t *) (current_block + sizeof(header_t) + size);
+				new_block->size = leftover_size - sizeof(header_t);
 				new_block->is_free = true;
 				new_block->next = current_block->next;
 				new_block->prev = current_block;
 
-				if (!(new_block->next)) last_block = new_block;
-
 				if (current_block->next) current_block->next->prev = new_block;
 				current_block->next = new_block;
+
+				if (last_block == current_block) last_block = new_block;
+				current_block->size = size; // This is in here to avoid heap fragmentation
 			}
 
 			current_block->is_free = false;
-			current_block->size = size;
 			return (void *) (current_block + 1);
 		} else {
 			current_block = current_block->next;
@@ -113,16 +113,12 @@ void *malloc(size_t size) {
 }
 
 int free(void *ptr) {
-	if (!heap_is_init) return -1;
-	// check if this is a valid block
-	if (!ptr) return -1; // Failure
+	if (!heap_is_init || !ptr) return -1;
+	// Check if this is a valid block
 	header_t *freed_block = ((header_t *) ptr) - 1;
-	if ((void*)freed_block < heap_start || (void*)freed_block >= heap_end) {
-		return -1;
-	} if (((uintptr_t) freed_block) % __alignof__(header_t) != 0) return -1;
-	if (freed_block->is_free || freed_block->size > heap_size || freed_block->size < 1 ||
-		(freed_block->next && (uint8_t *) freed_block->next < (uint8_t *) heap_start) ||
-		(freed_block->prev && (uint8_t *) freed_block->prev > (uint8_t *) heap_end)) return -1;
+	if ((void*)freed_block < heap_start || (void*)freed_block >= heap_end) return -2; // OoB error
+	freed_block -= ((uintptr_t) freed_block) % (__alignof__(header_t));
+	if (freed_block->is_free || freed_block->size > heap_size || freed_block->size < 1) return -4; // Invalid block error
 	header_t *current_block = first_block;
 	bool found = false;
 	while (current_block) {
@@ -131,7 +127,7 @@ int free(void *ptr) {
 			break;
 		}
 		current_block = current_block->next;
-	} if (!found) return -1; // This is all to prevent programs from breaking the heap with fake headers
+	} if (!found) return -5; // This is all to prevent programs from breaking the heap with fake headers
 
 	freed_block->is_free = true;
 	if (freed_block->next) {
@@ -145,6 +141,7 @@ int free(void *ptr) {
 			if (!(freed_block->next)) last_block = freed_block;
 		}
 	}
+
 	if (freed_block->prev) {
 		if (freed_block->prev->is_free) {
 			// Merge this block (and possibly the next) with the previous

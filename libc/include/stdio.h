@@ -2,18 +2,43 @@
 
 #include <sys/cdefs.h>
 #include <stddef.h>
+#include <stdarg.h>
 
 #define EOF (-1) // EOF as in End Of File
 
+/* vprintf
+ * PURPOSE - print string to screen with extar params formatted in
+ * INPUT - const char* __restrict (string to be printed), va_list parameters
+ * OUTPUT - int success_code
+ * EXCEPTIONS - -1 outputted (see TODO in .c file) if any error
+ * NOTE: vprintf (And all functions that use it) support ANSI escape characters now!
+ * TODO: currently, it prints to the screen. While this is correct, we want vprintf to emulate
+ * vfprintf, which prints to any stream necessary, instead of just writing to stdout/screen. */
+int vprintf(const char* __restrict, va_list);
+
 /* printf
  * PURPOSE - print string to screen with extar params formatted in
- * INPUT - const char* __restrict (string to be printed), va_args (anything to be formatted in)
+ * INPUT - const char* __restrict (string to be printed), ... (anything to be formatted in)
  * OUTPUT - int success_code
- * EXCEPTIONS - -1 outputted (see TODO in .c file) if any error 
+ * EXCEPTIONS - -1 outputted (see TODO in .c file) if any error
  * NOTE: printf (And all functions that use it) support ANSI escape characters now!
  * TODO: currently, it prints to the screen. While this is correct, we want printf to emulate
- * vprintf, which prints to any stream necessary, instead of just writing to stdout/screen. */
+ * fprintf, which prints to any stream necessary, instead of just writing to stdout/screen. */
 int printf(const char* __restrict, ...);
+
+/* vsprintf
+ * PURPOSE - parse and substitute a fomat string into the buffer based on the va_list given
+ * INPUT - char *buffer, const char* __restrict (string to be printed), va_list parameters
+ * OUTPUT - int success_code
+ * EXCEPTIONS - -1 outputted (see TODO in .c file) if any error */
+int vsprintf(char *, const char* __restrict, va_list);
+
+/* sprintf
+ * PURPOSE - parse and substitute a format string into the buffer based on the parameters given
+ * INPUT - char *buffer, const char* __restrict (string to be printed), ... (anything to be formatted in)
+ * OUTPUT - int success_code
+ * EXCEPTIONS - -1 outputted (see TODO in .c file) if any error */
+int sprintf(char *, const char* __restrict, ...);
 
 /* putchar
  * PURPOSE - print a character to the screen

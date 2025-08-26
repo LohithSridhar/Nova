@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <kernel/kernel_init.h>
+#include <drivers/keyboard.h>
 #include <sys/osname.h>
 
 extern void wait(void);
@@ -101,7 +102,8 @@ void kernel_main(void) {
 	}
 
 	// Make a random number
-	secret = get_rand() + 1; // get_rand is irq_0 based, and is also conveniently mod 100!
+	random_init();
+	secret = rand() % 100 + 1;
 	
 	printf("Welcome to the Number Guesser Game! I have a number between 1 and 100. Guess it in %d attempts!\n", max_attempts);
 	printf("Hint: the secret is at memory address \x1B[95;40m%p\x1B[0m. Catch it if you can!\n", &secret);

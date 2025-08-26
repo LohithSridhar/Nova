@@ -51,12 +51,32 @@ void print_heap_memory_data(void);
  * OUTPUT - int abs_value (|value| in math terms) */
 int abs(int);
 
+/* atoi
+ * PURPOSE - Converting a string into an integer
+ * INPUT - const char *str
+ * OUTPUT - int value
+ * EXCEPTION - If str isn't a valid integer (eg. "hello"), atoi returns 0. 
+ * NOTES - atoi accepts preceding spaces and tabs, and a -/+ before the number. */
+int atoi(const char *);
+
+/* srand
+ * PURPOSE - Setting the value of the random seed
+ * INPUT - int seed
+ * OUTPUT - NULL (seed is set) */
+void srand(int);
+
+/* rand
+ * PURPOSE - Getting a random value
+ * INPUT - NULL
+ * OUTPUT - int random_number */
+int rand(void);
+
 /* abort (panic in case of libk usage)
  * PURPOSE - Kernel Panic
  * INPUT - char *reason, char *process_name
  * OUTPUT - NULL */
 __attribute__((__noreturn__))
-void abort(char*, char*);
+void abort(const char*, const char*);
 
 // stdlib.h - One of the libc libraries. This is concerned with core system functions involving killing apps and working with
 // core heap allocation processes. It's one of the ways that you can save yourself from your own mistak- I mean segfaults.

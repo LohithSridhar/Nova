@@ -17,6 +17,14 @@ int memcmp(const void*, const void*, size_t);
  *             in that case, use memmove, which is slightly slower but doesn't crash. */
 void *memcpy(void *__restrict, const void *__restrict, size_t);
 
+/* memccpy
+ * PURPOSE - move a chunk of data size big from srcptr to dstptr, unless the char character is detected, in which case it stops early
+ * INPUT - void *dstptr (destination pointer), void *srcptr (source pointer), int character, size_t size (size of moved chunk)
+ * OUTPUT - void *dstptr_end (end of destination memory chunk)
+ * EXCEPTION - if the dst chunk and src chunk overlap, memccpy is unpredictable and can cause major crashes.
+ *             in that case, what on earth are you doing? */
+void *memccpy(void *__restrict, const void *__restrict, int, size_t);
+
 /* memmove
  * PURPOSE - move a chunk of data size big from srcptr to dstptr (safer)
  * INPUT - void *dstptr (destination pointer), void *srcptr (source pointer), size_t size (size of moved chunk)
@@ -49,8 +57,8 @@ int strcmp(const char*, const char*);
 
 /* strcpy
  * PURPOSE - move a string from srcstr to dststr
- * INPUT - void *dststr (destination string), void *srcstr (source string)
- * OUTPUT - void *dststr (start of destination string)
+ * INPUT - char *dststr (destination string), const char *srcstr (source string)
+ * OUTPUT - char *dststr (start of destination string)
  * EXCEPTION - if the dst string and src string overlap, strcpy is unpredictable and can cause major crashes.
  *             in that case, skill issue. */
 char *strcpy(char*, const char*);
@@ -124,6 +132,18 @@ char *strstr(const char *, const char *);
  * INPUT - char *str (string to tokenize), const char *delim (deliminations to tokenize with)
  * OUTPUT - char *str_next (I... I genuinely have no idea, I just followed a code flowchart) */
 char *strtok(char*, const char*);
+
+/* strdup
+ * PURPOSE - duplicate a string and return a pointer to the duplicate
+ * INPUT - const char *str
+ * OUTPUT - char *dup_str */
+char *strdup(const char*);
+
+/* strndup
+ * PURPOSE - duplicate a string up to a length and return a pointer to the duplicate
+ * INPUT - const char *str, size_t len
+ * OUTPUT - char *dup_str */
+char *strndup(const char*, size_t);
 
 // string.h - This is one of the libc libraries, designed for easy handling of strings and major chunks of memory. It's one
 // of the major c libraries, and also one of the ropes of the "noose" C gives you to hang yourself. Segfault here we come!

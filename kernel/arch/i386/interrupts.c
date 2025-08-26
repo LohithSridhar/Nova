@@ -17,7 +17,7 @@
 #define ICW1_ICW4    0x01
 #define ICW4_8086    0x01
 
-int timenum = 0; // temp until timers/semaphores are introd to the os
+volatile int timenum = 0; // temp until timers/semaphores are introd to the os
 
 void pic_remap(int offset1, int offset2) {
 	uint8_t a1 = inb(PIC1_DATA);

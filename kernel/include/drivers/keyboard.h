@@ -31,8 +31,8 @@ char read_buffer(void);
 /* read_keyboard
  * PURPOSE - Read a message buflen long from the keyboard to the buffer. Options for multiline and silent typing.
  * INPUT - char *buffer (buffer to read to), size_t buflen (amount to read), bool silent (replaces the letters
- * with a simple white block (IBM CP437 number 219)), and bool multiline (makes [ENTER] add \n, and [SHIFT]+[ENTER] exit.)
+ * with a simple white block (IBM CP437 number 219)
  * OUTPUT - nothing, as the message is READ into buffer instead. */
-void read_keyboard(char*, size_t, bool, bool);
+void read_keyboard(char*, size_t, bool);
 
-// keyboard.h - the API for the libk and kernel to interfac with the keyboard. Primarily uses read_keyboard.
+// keyboard.h - the API for the libk and kernel to interface with the keyboard. Primarily uses read_keyboard.
