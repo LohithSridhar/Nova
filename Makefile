@@ -28,7 +28,7 @@ LDFLAGS=
 LIBS=
 
 # Configure the cross-compiler to use the desired system root.
-SYSROOT=$(shell pwd)/sysroot
+SYSROOT=sysroot/
 PLAIN_CC=$(CC) --sysroot=$(SYSROOT)
 
 # Work around the fact that -elf gcc targets don't have a system include directory because they're configured with --without-headers rather than --with-sysroot.
