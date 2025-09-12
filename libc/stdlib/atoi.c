@@ -15,3 +15,5 @@ int atoi(const char *s) {
 	if (read) return val * sign;
 	return 0; // Invalid output
 }
+
+// atoi.c - This function is a utility designed to convert strings into numbers.

@@ -1,4 +1,4 @@
-# Nova Electron (v0.1.8.9)
+# Nova Electron (v0.1.9.0)
 
 _A hobby operating system for x86, featuring plug-and-play libc, kernel, and drivers. Made for educational use by me, Lohith._
 

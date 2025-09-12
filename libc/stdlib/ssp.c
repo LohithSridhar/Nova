@@ -24,3 +24,7 @@ void __ssp_init(uint32_t seed) {
 	return;
 }
 #endif
+
+// ssp.c - This is the file related to all the stack smash protection compiler features. SSP is a basic way to detect stack
+// overflows/buffer overruns whenever they occur, although it only works after a function call, which is why it isn't a
+// silver bullet. It's automatically included in stdlib.h.
