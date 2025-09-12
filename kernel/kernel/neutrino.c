@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include <sys/osname.h>
 
 #define IS_SPECIAL (c == 0x00 || c == 0xFF || c == 0x0A || c == 0x08)
@@ -16,7 +17,7 @@ extern void print_heap_memory_data(void);
 void print_memory(void *addr, size_t len) {
 	uint8_t *p = (uint8_t *)addr;
 	putchar(' '); putchar(218); for (int i = 3; i <= 61; i++) putchar(196);
-	putchar(194); for (int i = 63; i < 79; i++) putchar(196); putchar(191);
+	putchar(210); for (int i = 63; i < 79; i++) putchar(196); putchar(191);
     putchar('\n');
 	for (size_t i = 0; i < len; i += 16) {
 		putchar(' ');
@@ -27,7 +28,7 @@ void print_memory(void *addr, size_t len) {
 			else if (i + j < len) printf("%02X", p[len-1]);
 			else printf(" XX"); // padding
 		if ((i + 16) >= len) putchar(' ');
-		putchar(179);
+		putchar(186);
 		for (size_t j = 0; j < 16; j++) {
 			uint8_t c = p[i+j];
 			if (i + j < len) printf("%c", !IS_SPECIAL && (IS_PRINTABLE || IS_EXT_PRINTABLE) ? c : '.');
@@ -39,7 +40,7 @@ void print_memory(void *addr, size_t len) {
 	}
 
 	putchar(' '); putchar(192); for (int i = 3; i <= 61; i++) putchar(196);
-	putchar(193); for (int i = 63; i < 79; i++) putchar(196); putchar(217);
+	putchar(208); for (int i = 63; i < 79; i++) putchar(196); putchar(217);
 	putchar('\n');
 }
 
@@ -72,6 +73,8 @@ void debugger() {
 	while (!exit) {
 		printf("\x1B[32;40mroot> \x1B[0m");
 		scanf("%s %s %X %X", command, arg1, &arg2, &arg3);
+		for (int i = 0; command[i] != '\0'; i++) command[i] = tolower(command[i]);
+		for (int i = 0; arg1[i] != '\0'; i++) arg1[i] = tolower(arg1[i]);
 		printf("\x1B[94;40m");
 		if (!strcmp(command, "exit") || !strcmp(command, "quit") || !strcmp(command, "continue") || !strcmp(command, "c")) {
 			exit = true;
@@ -97,17 +100,17 @@ void debugger() {
 			printf("%s version %s\n", OS_NAME, OS_VERSION);
 		} else if (!strcmp(command, "help") || !strcmp(command, "man") || !strcmp(command, "h")) {
 			printf("Neutrino - IKD for NovaOS - Manual\n");
-			printf("Available commands:\nexit/quit/continue/c - quits Neutrino and continues the program.\n");
-			printf("help/man/h - prints out this instruction manual.\nabort/panic - causes a kernel panic.\n");
-			printf("version/ver/v - prints the name and version number of the OS.\n");
-			printf("convert/conv/cnv - converts between hexadecimal and decimal based on the subcommands:\n");
-			printf("\x1B[34;40m\thexadecimal/hex/h - converts a decimal number to hexadecimal.\n");
-			printf("\tdecimal/dec/d - converts a hexadecimal number to decimal.\n");
-			printf("\x1B[94;40mprint/p - prints relevant data. Available print subcommands:\n");
-			printf("\x1B[34;40m\tstack/s - prints stack region.\n\tregisters/regs/reg/r - prints registers.\n");
-			printf("\tmemory - prints memory region based on next arguments:\n\t\tmemory region start\n\t\tmemory region size\n");
-			printf("\theap_headers/hh - prints the header information of all heap blocks.\n\theap_memory/hm - ");
-			printf("prints the header and memory info of the blocks.\n");
+			printf("Available commands:\nexit/quit/continue/c - quit Neutrino and continues the program.\n");
+			printf("help/man/h - print out this instruction manual.\nabort/panic - cause a kernel panic.\n");
+			printf("version/ver/v - print the name and version number of the OS.\n");
+			printf("convert/conv/cnv - convert between base-16 and base-10 based on next argument:\n");
+			printf("\x1B[34;40m\thexadecimal/hex/h - convert a base-10 number to base-16.\n");
+			printf("\tdecimal/dec/d - convert a base-16 number to base-10.\n");
+			printf("\x1B[94;40mprint/p - print relevant data. Available print subcommands:\n");
+			printf("\x1B[34;40m\tstack/s - print stack region.\n\tregisters/regs/reg/r - print registers.\n");
+			printf("\tmemory - print memory region based on next arguments:\n\t\tmemory region start\n\t\tmemory region size\n");
+			printf("\theap_headers/hh - print the header information of all heap blocks.\n\theap_memory/hm - ");
+			printf("print the header and memory info of the blocks.\n");
 			printf("\x1B[94;40mNote that any underscores (_) are interchangable with dashes (-) or nothing ().\n");
 		} else {
 			printf("\x1B[35;40mInvalid command: ");

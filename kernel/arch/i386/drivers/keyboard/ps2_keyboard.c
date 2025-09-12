@@ -561,7 +561,7 @@ void keyboard_interrupt(void) {
 			  || (scan_code_t) scan_code == SC_ESC) {
 		if (debug_trigger < 3) debug_trigger++;
 		if (debug_trigger >= 3 && !currently_in_a_breakpoint()) {
-			set_in_breakpoint_true();
+			breakpoint();
 			debug_trigger = 0;
 		}
 	}

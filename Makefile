@@ -22,7 +22,7 @@ BOOTDIR=/boot
 LIBDIR=$(EXEC_PREFIX)/lib
 INCLUDEDIR=$(PREFIX)/include
 
-CFLAGS=-O2 -g
+CFLAGS=-O2 -g -fstack-protector-all
 CPPFLAGS=
 LDFLAGS=
 LIBS=

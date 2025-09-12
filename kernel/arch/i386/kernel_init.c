@@ -131,6 +131,7 @@ void kernel_init(void) {
 	disable_interrupts();                        // External: asm cli
 
 	set_kernel_stack();                          // Set esp to point to proper kernel stack
+	__ssp_init(0xDEADBEEF);
 
 	gdt_init();
 	idt_init();

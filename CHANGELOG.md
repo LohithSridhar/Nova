@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## Nova Electron [v0.1.9.0] - 12-Sep-2025
+### Added
+- Stack Smash Protection
+### Improved
+- Breakpoint Interrupt Logic (at least it's readable)
+- Interrupt Handling Logic
+### Fixed
+- Error where going into Neutrino would randomly just freeze the keyboard
+
+---
+
 ## Nova Electron [v0.1.8.9] - 23-Aug-2025
 ### NOTE: THIS IS THE FIRST ADDED ENTRY
 ### Added

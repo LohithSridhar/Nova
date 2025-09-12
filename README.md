@@ -23,6 +23,7 @@ _A hobby operating system for x86, featuring plug-and-play libc, kernel, and dri
 - ANSI Escape Key support
 - Scrolling and screen loading/saving support
 - Switchable drivers with an agnostic kernel
+- Stack Smash Protection
 
 ---
 
@@ -77,11 +78,12 @@ Remember to clean after running the program if making changes, as `make iso` ass
 - [x] Basic Timer Functions (`rand`, `srand`)
 - [x] Expanded libc/k (`str(n)dup`, `memccpy`, `atoi`, `sprintf`)
 - [x] Optimisation of I/O (also added holding keys for the PS/2)
+- [x] SSP and Improved Safety and Privacy features
+- [x] Improved printf and scanf architecture (for futureproofing with FILE type)
 - [ ] New Name! (Muon)
-- [ ] Best-Fit Memory Management
 - [ ] Basic Non-Switching Paging
+- [ ] Best-Fit Memory Management
 - [ ] Improved IKD with Stack Traceback
-- [ ] SSP and Improved Safety and Privacy features
 
 ---
 

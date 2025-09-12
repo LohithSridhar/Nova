@@ -83,7 +83,7 @@ void kernel_main(void) {
 
 	/* Primary kernel code here. */
 
-	//printf(malloc_test() ? "\x1B[91;40mTest failed.\n" : "\x1B[92;40mTest successful!\n");
+	printf(malloc_test() ? "\x1B[91;40mTest failed.\n" : "\x1B[92;40mTest successful!\n");
 	
 	printf("\x1B[0mMoving on...\nWould you like to play a game? ");
 

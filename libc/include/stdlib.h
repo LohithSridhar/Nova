@@ -5,7 +5,15 @@
 #endif
 
 #include <sys/cdefs.h>
+#include <stdint.h>
 #include <stddef.h>
+
+extern uintptr_t *__stack_chk_guard;
+
+__attribute__((__noreturn__))
+void __stack_chk_fail(void);
+
+void __ssp_init(uint32_t);
 
 /* malloc
  * PURPOSE - Possibly THE most used funciton in C. Allocates memory to the heap.

@@ -1,6 +1,7 @@
 #include "interrupts.h"
 #include "io.h"
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <drivers/keyboard.h>
@@ -83,7 +84,11 @@ void irq_handler(int irq_num) {
 			keyboard_interrupt();
 			break;
 		case 3:
-			enter_neutrino();
+			if (in_a_breakpoint()) {
+				enter_neutrino();
+			} else {
+				__stack_chk_fail(); // SSP Calls the Debugger for some reason?
+			}
 			break;
 		default:
 			printf("UNKNOWN INTERRUPT (NUMBER 0x%X)", irq_num);

@@ -41,6 +41,11 @@ irq3_handler:
 
 # Fallback for all other IRQs/exceptions
 irq_default_handler:
+	pusha
+	push $3
+	call irq_handler
+	add $4, %esp
+	popa
 	cli
 .halt_forever:
 	hlt
