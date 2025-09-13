@@ -2,7 +2,7 @@ HOST?=i686-elf
 SCREEN?=vga
 KEYBOARD?=ps2
 OSNAME?=Nova Electron
-OSVERSION?=v0.1.8.9
+OSVERSION?=v0.1.9.0
 ISONAME?=NovaElectron.iso
 OSFULLNAME?=$(OSNAME) ($(OSVERSION))
 BOOTSPLASH?=false
@@ -22,7 +22,7 @@ BOOTDIR=/boot
 LIBDIR=$(EXEC_PREFIX)/lib
 INCLUDEDIR=$(PREFIX)/include
 
-CFLAGS=-O2 -g -fstack-protector-all
+CFLAGS=-O2 -g -fstack-protector-strong
 CPPFLAGS=
 LDFLAGS=
 LIBS=
@@ -97,7 +97,7 @@ headers:
 	@mkdir -p $(SYSROOT)$(INCLUDEDIR)
 	@$(info Copying headers...)
 	@echo '#define OS_NAME "$(OSNAME)"\n#define OS_VERSION "$(OSVERSION)"\n#define \
-	OS_FULL_NAME "$(OSFULLNAME)"// osname.h - The only purpose of this header \
+	OS_FULL_NAME "$(OSFULLNAME)"\n// osname.h - The only purpose of this header \
 	is to centralise our OS name in here.' > libc/include/sys/osname.h
 	@cp -R */include/. $(SYSROOT)$(INCLUDEDIR)/.
 
@@ -188,6 +188,8 @@ clean:
 	@rm -rf $(KERNEL_OBJS:.o=.d) $(LIBC_OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d */*/*/*.d */*/*/*/*.d
 	$(info Deleting file structures...)
 	@rm -rf sysroot isodir $(ISONAME)
+	$(info Deleting generated headers...)
+	@rm -rf libc/include/sys/osname.h
 
 cycle: run clean
 
