@@ -194,7 +194,7 @@ clean:
 cycle: run clean
 
 line-count:
-	$(info Finding line count across .c, .h, .config, Makefile, .ld, .s, .config, and .cfg...")
+	$(info Finding line count across .c, .h, .config, Makefile, .ld, .s, .config, and .cfg...)
 	@find . -type f \( -name "*.ld" -o -name "Makefile" -o -name "*.s" -o -name "*.c" -o -name "*.h" -o -name \
 	"make.config" -name "*.cfg" \) -print0 | xargs -0 wc -l | tail -n 1
 
