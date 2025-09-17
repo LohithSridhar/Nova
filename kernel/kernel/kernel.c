@@ -78,20 +78,20 @@ int malloc_test(void) {
 void kernel_main(void) {
 	// Standard initalisation and basic bootsplash here.
 	kernel_init();
-	printf("\x1B[90;40mWelcome to %s\n", OS_FULL_NAME);
-	printf("To enter debug mode, press [CTRL]+[OPT/ALT]+[ESC]\x1B[0m\n\n");
+	printf("\e[90;40mWelcome to %s\n", OS_FULL_NAME);
+	printf("To enter debug mode, press [CTRL]+[OPT/ALT]+[ESC]\e[0m\n\n");
 
 	/* Primary kernel code here. */
 
 	bool malloc_working = malloc_test();
 
-	printf(malloc_working ? "\x1B[91;40mTest failed.\n" : "\x1B[92;40mTest successful!\n");
+	printf(malloc_working ? "\e[91;40mTest failed.\n" : "\e[92;40mTest successful!\n");
 	
-	printf("\x1B[0mMoving on...\nWould you like to play a game? ");
+	printf("\e[0mMoving on...\nWould you like to play a game? ");
 
 	char temp[100];
 	scanf("%s", temp);
-	printf("\x1B[35;40mEither way, you're playing!\x1B[0m\n");
+	printf("\e[35;40mEither way, you're playing!\e[0m\n");
 	bool won = false;
 
 	int secret, guess, attempts = 0;
@@ -99,7 +99,7 @@ void kernel_main(void) {
 
 	int *guesses = (int *)malloc(max_attempts * sizeof(int));
 	if (!guesses) {
-		printf("\x1B[31;40mFailed to allocate memory for guesses. Continuing without record.\n");
+		printf("\e[31;40mFailed to allocate memory for guesses. Continuing without record.\e[0m\n");
 	}
 
 	// Make a random number
@@ -107,13 +107,13 @@ void kernel_main(void) {
 	secret = rand() % 100 + 1;
 	
 	printf("Welcome to the Number Guesser Game! I have a number between 1 and 100. Guess it in %d attempts!\n", max_attempts);
-	printf("Hint: the secret is at memory address \x1B[95;40m%p\x1B[0m. Catch it if you can!\n", &secret);
+	printf("Hint: the secret is at memory address \e[95;40m%p\e[0m. Catch it if you can!\n", &secret);
 
 	while (attempts < max_attempts) {
-		printf("\x1B[0mAttempt #%d: \x1B[94;40m", attempts + 1);
+		printf("\e[0mAttempt #%d: \e[94;40m", attempts + 1);
 
 		if (scanf("%d", &guess) != 1) {
-			printf("\x1B[35;40mIt's alright; it isn't the first time you forgot how to count!\n");
+			printf("\e[35;40mIt's alright; it isn't the first time you forgot how to count!\n");
 			continue;
 		}
 
@@ -124,7 +124,7 @@ void kernel_main(void) {
 		attempts++;
 
 		if (guess == secret) {
-			printf("\x1B[32;40mCongratulations! \x1B[0mYou guessed the correct number, %d, in %d attempts.\n", secret, attempts);
+			printf("\e[32;40mCongratulations! \e[0mYou guessed the correct number, %d, in %d attempts.\n", secret, attempts);
 			won = true;
 			break;
 		}
@@ -133,22 +133,22 @@ void kernel_main(void) {
 			break;
 		} else {
 			if (guess < secret) {
-				printf("\x1B[35;40mToo low! Try again.\n");
+				printf("\e[35;40mToo low! Try again.\n");
 			} else {
-				printf("\x1B[36;40mToo high! Try again.\n");
+				printf("\e[36;40mToo high! Try again.\n");
 			}
 		}
 	}
 
-	if (!won) printf("\x1B[91;40mAww, you've failed. The correct answer was %d.\n", secret);
+	if (!won) printf("\e[91;40mAww, you've failed. The correct answer was %d.\n", secret);
 
 	// If guesses were recorded, print them
 	if (guesses) {
-		printf("\x1B[0mYour guesses were:");
+		printf("\e[0mYour guesses were:");
 		for (int i = 0; i < attempts - 1; i++) {
 			printf(" %d,", guesses[i]);
 		}
-		if (attempts == 1) printf(" %d. \x1B[92;40mWow, only one guess?! Very good!\x1B[0m\n", guesses[0]);
+		if (attempts == 1) printf(" %d. \e[92;40mWow, only one guess?! Very good!\e[0m\n", guesses[0]);
 		else printf(" and %d.\n", guesses[attempts - 1]);
 		free(guesses);
 	}

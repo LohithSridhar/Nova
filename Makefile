@@ -1,9 +1,10 @@
 HOST?=i686-elf
 SCREEN?=vga
 KEYBOARD?=ps2
-OSNAME?=Nova Electron
+OS_SUBNAME?=Muon
+OSNAME?=Nova $(OS_SUBNAME)
 OSVERSION?=v0.1.9.0
-ISONAME?=NovaElectron.iso
+ISONAME?=Nova$(OS_SUBNAME).iso
 OSFULLNAME?=$(OSNAME) ($(OSVERSION))
 BOOTSPLASH?=false
 ARCH:=$(shell if echo "$(HOST)" | grep -Eq 'i[[:digit:]]86-'; then echo i386; else echo "$(HOST)" | grep -Eo '^[[:alnum:]_]*'; fi)
@@ -22,7 +23,7 @@ BOOTDIR=/boot
 LIBDIR=$(EXEC_PREFIX)/lib
 INCLUDEDIR=$(PREFIX)/include
 
-CFLAGS=-O2 -g -fstack-protector-strong
+CFLAGS=-O2 -fstack-protector-strong -g2
 CPPFLAGS=
 LDFLAGS=
 LIBS=
@@ -50,7 +51,7 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
 
 LIBC_CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude $(ARCH_CPPFLAGS)
-LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
+LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS) -g2
 LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) -D__is_libk $(KERNEL_ARCH_CPPFLAGS)
 KERNEL_ARCH_OBJS:=$(strip $(KERNEL_ARCH_OBJS))
 ARCH_FREEOBJS:=$(strip $(ARCH_FREEOBJS))
@@ -58,7 +59,7 @@ ARCH_FREEOBJS:=$(strip $(ARCH_FREEOBJS))
 # NOTE: the video driver has the same $(SCREEN) name as the tty driver.
 DRIVER_OBJS=kernel/$(ARCHDIR)/drivers/tty/$(SCREEN)_tty.o kernel/$(ARCHDIR)/drivers/keyboard/$(KEYBOARD)_keyboard.o
 
-KERNEL_C_OBJS=$(KERNEL_ARCH_OBJS) $(DRIVER_OBJS) kernel/kernel/kernel.o kernel/kernel/neutrino.o
+KERNEL_C_OBJS=$(KERNEL_ARCH_OBJS) $(DRIVER_OBJS) kernel/kernel/kernel.o kernel/kernel/neutrino.o kernel/kernel/paging.o
 KERNEL_C_OBJS:=$(strip $(KERNEL_C_OBJS))
 
 KERNEL_OBJS=kernel/$(ARCHDIR)/crti.o kernel/$(ARCHDIR)/crtbegin.o $(KERNEL_C_OBJS) kernel/$(ARCHDIR)/crtend.o kernel/$(ARCHDIR)/crtn.o
@@ -86,7 +87,7 @@ LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
 #BINARIES=libc.a libk.a # Not ready for libc yet.
 BINARIES=libk.a
 
-.PHONY: all headers install-kernel install-libs grub-cfg build run clean cycle line-count quick-run Nova.iso NovaOS.iso iso
+.PHONY: all headers install-kernel install-libs grub-cfg build run clean cycle line-count quick-run Nova.iso NovaOS.iso iso debug
 
 all: nova.kernel $(BINARIES)
 
@@ -137,12 +138,12 @@ kernel/$(ARCHDIR)/crtbegin.o kernel/$(ARCHDIR)/crtend.o:
 install-kernel: nova.kernel
 	$(info Installing kernel...)
 	@mkdir -p $(SYSROOT)$(BOOTDIR)
-	@cp nova.kernel $(SYSROOT)$(BOOTDIR)
+	@mv nova.kernel $(SYSROOT)$(BOOTDIR)
 
 install-libs: $(BINARIES)
 	$(info Installing libraries...)
 	@mkdir $(SYSROOT)$(LIBDIR)
-	@cp $(BINARIES) $(SYSROOT)$(LIBDIR)
+	@mv $(BINARIES) $(SYSROOT)$(LIBDIR)
 
 build: headers install-libs install-kernel
 
@@ -162,6 +163,7 @@ grub-cfg:
 	fi
 
 $(ISONAME) NovaOS.iso Nova.iso iso: 
+	@echo "$(CFLAGS)"
 	@make build
 	@make grub-cfg
 
@@ -175,14 +177,13 @@ run: $(ISONAME)
 quick-run:
 	qemu-system-$(ARCH) -k en-us -cdrom $(ISONAME)
 
-debug: $(ISONAME)
+debug:
+	@make $(ISONAME)
 	(qemu-system-$(ARCH) -k en-us -s -S -cdrom $(ISONAME) &)
 	(sleep 1 && gdb sysroot/boot/nova.kernel)
-	make clean
+	@make clean
 
 clean:
-	$(info Deleting major binaries...)
-	@rm -rf nova.kernel $(BINARIES)
 	$(info Deleting Objects and Dependancies...)
 	@rm -rf $(KERNEL_OBJS) $(LIBC_OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o */*/*/*.o */*/*/*/*.o
 	@rm -rf $(KERNEL_OBJS:.o=.d) $(LIBC_OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d */*/*/*.d */*/*/*/*.d

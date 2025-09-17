@@ -41,7 +41,7 @@ void *realloc(void *, size_t);
 
 #if defined(__is_libk)
 /* print_heap_header_data
- * PURPOSE - Debug Print - prints the heap's header data
+ * PURPOSE - Debug Print - prints the heap's header data.
  * INPUT - NULL
  * OUTPUT - NULL (the relevant data is printed) */
 void print_heap_header_data(void);

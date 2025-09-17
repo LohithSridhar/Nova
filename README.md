@@ -1,4 +1,4 @@
-# Nova Electron (v0.1.9.0)
+# Nova Muon (v0.1.9.1)
 
 _A hobby operating system for x86, featuring plug-and-play libc, kernel, and drivers. Made for educational use by me, Lohith._
 
@@ -69,21 +69,17 @@ Remember to clean after running the program if making changes, as `make iso` ass
 
 ## Roadmap
 
-- [x] TTY Driver
-- [x] Keyboard Driver
-- [x] Heap management
-- [x] Breakpoint interrupt
-- [x] Bootsplash
 - [x] Internal Kernel Debugger
 - [x] Basic Timer Functions (`rand`, `srand`)
 - [x] Expanded libc/k (`str(n)dup`, `memccpy`, `atoi`, `sprintf`)
 - [x] Optimisation of I/O (also added holding keys for the PS/2)
 - [x] SSP and Improved Safety and Privacy features
 - [x] Improved printf and scanf architecture (for futureproofing with FILE type)
-- [ ] New Name! (Muon)
+- [x] New Name! (Muon)
 - [ ] Basic Non-Switching Paging
 - [ ] Best-Fit Memory Management
 - [ ] Improved IKD with Stack Traceback
+- [ ] Multithreading
 
 ---
 

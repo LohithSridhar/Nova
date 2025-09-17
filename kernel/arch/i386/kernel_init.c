@@ -3,13 +3,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/osname.h>
 #include <drivers/tty.h>
 #include <drivers/keyboard.h>
 #include "io.h"
 #include "interrupts.h"
+#include <kernel/paging.h>
 #include <kernel/kernel_init.h>
 
-extern void heap_initialize(void);
+extern int heap_initialize(size_t);
 
 #define GDT_ENTRIES 4
 #define KERNEL_STACK_TOP 0x200000
@@ -143,9 +145,9 @@ void kernel_init(void) {
 
 	enable_interrupts();                         // External: asm sti
 
-	// Kernel main loop or hand off to further init...
-	heap_initialize();
+	paging_initialize();
 	tty_initialize();
+	if (heap_initialize(128) != 0) abort("Heap Init Failure", OS_NAME);
 	keyboard_initialize();
 	return;
 }
