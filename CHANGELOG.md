@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## Nova Muon [v0.1.9.1] - 12-Sep-2025
+### Added
+- Paging without disk switching
+### Improved
+- Memory allocation logic
+- Code organisation and compilation
+### Fixed
+- Error where the heap initialiser would just not work
+
+---
+
 ## Nova Electron [v0.1.9.0] - 12-Sep-2025
 ### Added
 - Stack Smash Protection
